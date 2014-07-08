@@ -43,7 +43,7 @@ function run(opts, cb) {
 			});
 		}
 
-		log(colName, query, 'started..');
+		log(colName, 'started..');
 		var cursor = colFrom.find(query);
 		report[colName] = {copied: 0, duplicates: 0, duplicateIds: []};
 
@@ -72,7 +72,7 @@ function run(opts, cb) {
 			.on('finish', function() {
 				!report[colName].duplicates && delete report[colName].duplicates;
 				!report[colName].duplicateIds.length && delete report[colName].duplicateIds;
-				log(colName, query, 'finished, docs copied:', report[colName].copied);
+				log(colName, 'finished, docs copied:', report[colName].copied);
 				return cb();
 			});
 	}

@@ -1,6 +1,6 @@
 {
   "name": "mongocopy",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "module for copying the subsets of data between mongo databases",
   "main": "index.js",
   "scripts": {
