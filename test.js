@@ -94,7 +94,6 @@ test('cleaning previous test data', function(t) {
 									t.test('copying same data from xprod to xstage with duplicates ignored', function(t) {
 										var ignoreDuplicates = JSON.parse(JSON.stringify(testConfig));
 										ignoreDuplicates.ignoreDuplicates = true;
-										console.log(ignoreDuplicates);
 										mongocopy(ignoreDuplicates, function(err, report) {
 											t.notOk(err, 'copied from xprod to xstage');
 											t.deepEqual(report, {
