@@ -3,16 +3,16 @@ mongocopy
 
 Sometimes we need to copy a special set of user data from one environment to another.
 The module fits nicely when you want to
-- select a set of collections
-- add match criteria to the documents inside
-- specify transform function for documents
-- and get it on other db
+* select a set of collections
+* add match criteria to the documents inside
+* specify transform function for documents
+* and get it on other db
 
 example
 ====
 
-Let's assume you have production and staging database.
-In production you have 
+Assume you have production and staging database.
+In production db you have
 ```json
 {
 	products: [
@@ -32,10 +32,11 @@ In production you have
 	files: [..],
 	other: [..]
 }
+```
 
 You want to copy only a few collections for the user 1, transform the documents inside because of env differences, and also you want some dictionary eg countries
 
-```
+```javascript
 var mongocopy = require('mongocopy');
 
 var opts = {
@@ -64,5 +65,7 @@ var opts = {
 mongocopy(opts, function(err, report) {
 	console.log(arguments);
 });
+
+```
 
 That's it!
