@@ -13,7 +13,7 @@ example
 
 Assume you have production and staging database.
 In production db you have
-```json
+```javascript
 {
 	products: [
 		{userId: 1, _id: 1, name: 'apple'},
