@@ -1,7 +1,7 @@
 {
   "name": "mongocopy",
-  "version": "0.0.0",
-  "description": "module for copying the data between mongo databases",
+  "version": "0.0.1",
+  "description": "module for copying the subsets of data between mongo databases",
   "main": "index.js",
   "scripts": {
     "test": "node test"
