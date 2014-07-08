@@ -2,6 +2,8 @@ var mongojs = require('mongojs');
 var stream = require('stream');
 var async = require('async');
 
+var DUPLICATE_KEY_ERROR = 11000;
+
 function run(opts, cb) {
 	if (!(opts && opts.uriFrom && opts.uriTo && opts.data)) {
 		throw 'uriFrom|uritTo|data options are missing';
@@ -29,6 +31,11 @@ function run(opts, cb) {
 			var _this = this;
 			return colTo.insert(doc, function(err, newDoc) {
 				if (err) {
+					if (err.code === DUPLICATE_KEY_ERROR) {
+						report[colName].duplicates++;
+						report[colName].duplicateIds.push(doc._id);
+						return opts.ignoreDuplicates ? cb() : cb(err);
+					}
 					return cb(err);
 				}
 				_this.push(newDoc);
@@ -38,7 +45,7 @@ function run(opts, cb) {
 
 		log(colName, query, 'started..');
 		var cursor = colFrom.find(query);
-		report[colName] = {copied: 0};
+		report[colName] = {copied: 0, duplicates: 0, duplicateIds: []};
 
 		if (transform) {
 			var transy = new stream.Transform({objectMode: true});
@@ -63,6 +70,8 @@ function run(opts, cb) {
 			})
 			.on('error', cb)
 			.on('finish', function() {
+				!report[colName].duplicates && delete report[colName].duplicates;
+				!report[colName].duplicateIds.length && delete report[colName].duplicateIds;
 				log(colName, query, 'finished, docs copied:', report[colName].copied);
 				return cb();
 			});

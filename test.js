@@ -90,9 +90,36 @@ test('cleaning previous test data', function(t) {
 											t.deepEqual(docs, testData.countries, 'returns all copied countries');
 										});
 									});
+
+									t.test('copying same data from xprod to xstage with duplicates ignored', function(t) {
+										var ignoreDuplicates = JSON.parse(JSON.stringify(testConfig));
+										ignoreDuplicates.ignoreDuplicates = true;
+										console.log(ignoreDuplicates);
+										mongocopy(ignoreDuplicates, function(err, report) {
+											t.notOk(err, 'copied from xprod to xstage');
+											t.deepEqual(report, {
+												products: {copied: 0, duplicates: 2, duplicateIds: [1, 2]},
+												customers: {copied: 0, duplicates: 2,  duplicateIds: [1, 2]},
+												countries: {copied: 0, duplicates: 3,  duplicateIds: [1, 2, 3]}
+											}, 'reports that nothing was copied because of duplicates');
+											t.end();
+										});
+									});
+
+									t.test('copying same data from xprod to xstage without duplicates ignored', function(t) {
+										mongocopy(testConfig, function(err, report) {
+											t.ok(err, 'error when copying from xprod to xstage');
+											t.deepEqual(report, {
+												products: {copied: 0, duplicates: 1, duplicateIds: [1]}
+											}, 'reports that nothing was copied because of the first duplicate occured');
+											t.end();
+										});
+									});
 									t.end();
 								});
 							});
+							
+							
 							t.end();
 						})
 					});
