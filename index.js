@@ -11,7 +11,12 @@ function run(opts, cb) {
 	var dbFrom = mongojs(opts.uriFrom, collections);
 	var dbTo = mongojs(opts.uriTo, collections);
 
-	return async.eachSeries(collections, runOne, cb);
+	var report = {};
+	log('copying..');
+	return async.eachSeries(collections, runOne, function(err) {
+		log('finished.');
+		return cb(err, report);
+	});
 
 	function runOne(colName, cb) {
 		var colFrom = dbFrom[colName];
@@ -19,12 +24,21 @@ function run(opts, cb) {
 		var query = opts.data[colName].query || {};
 		var transform = opts.data[colName].transform;
 
-		var insy =  new stream.Writable({objectMode: true});
-		insy._write = function (doc, enc, cb) {
-			return colTo.insert(doc, cb);
+		var insy =  new stream.Transform({objectMode: true});
+		insy._transform = function (doc, enc, cb) {
+			var _this = this;
+			return colTo.insert(doc, function(err, newDoc) {
+				if (err) {
+					return cb(err);
+				}
+				_this.push(newDoc);
+				return cb();
+			});
 		}
 
-		var res = colFrom.find(query);
+		log(colName, query, 'started..');
+		var cursor = colFrom.find(query);
+		report[colName] = {copied: 0};
 
 		if (transform) {
 			var transy = new stream.Transform({objectMode: true});
@@ -38,18 +52,24 @@ function run(opts, cb) {
 					return cb();
 				});
 			}
-			res = res.pipe(transy).pipe(insy);
+			cursor = cursor.pipe(transy).pipe(insy);
 		} else {
-			res = res.pipe(insy);
+			cursor = cursor.pipe(insy);
 		}
 		
-		return res
-			.on('error', function(err) {
-				return cb(err);
+		return cursor
+			.on('data', function(data) {
+				report[colName].copied++;
 			})
+			.on('error', cb)
 			.on('finish', function() {
+				log(colName, query, 'finished, docs copied:', report[colName].copied);
 				return cb();
 			});
+	}
+
+	function log() {
+		opts.log && console.log.apply(this, ['	'].concat([].slice.call(arguments)));
 	}
 }
 

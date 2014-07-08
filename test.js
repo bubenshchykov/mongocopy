@@ -40,7 +40,8 @@ var testConfig = {
 				}
 			},
 			countries: {}	
-		}
+		},
+		log: true
 	};
 
 test('cleaning previous test data', function(t) {
@@ -62,6 +63,11 @@ test('cleaning previous test data', function(t) {
 							t.test('copying data from xprod to xstage', function(t) {
 								mongocopy(testConfig, function(err, report) {
 									t.notOk(err, 'copied from xprod to xstage');
+									t.deepEqual(report, {
+										products: {copied: 2},
+										customers: {copied: 2},
+										countries: {copied: 3}
+									}, 'reports an expected result');
 
 									t.test('reading the new records from the xstage', function(t){
 										t.plan(6);
