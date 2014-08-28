@@ -72,7 +72,7 @@ test('cleaning previous test data', function(t) {
 									t.test('reading the new records from the xstage', function(t){
 										t.plan(6);
 										stage.products.find({}).toArray(function(err, docs){
-											t.notOk(err, 'fount products on xstage');
+											t.notOk(err, 'found products on xstage');
 											t.deepEqual(docs, [
 												{userId: 1, _id: 1, name: 'apple xxl'},
 												{userId: 1, _id: 2, name: 'orange xxl'}
@@ -111,6 +111,41 @@ test('cleaning previous test data', function(t) {
 											t.deepEqual(report, {
 												products: {copied: 0, duplicates: 1, duplicateIds: [1]}
 											}, 'reports that nothing was copied because of the first duplicate occured');
+											t.end();
+										});
+									});
+
+									t.test('copying data from xprod to xstage in dry run', function(t) {
+										var dryRun = JSON.parse(JSON.stringify(testConfig));
+										dryRun.dryRun = true;
+										mongocopy(dryRun, function(err, report) {
+											t.notOk(err, 'dry run went good');
+											t.deepEqual(report, {
+												countries: {copied: 3},
+												customers: {copied: 2},
+												products: {copied: 2}
+											}, 'reports documents satisfying the given queries');
+											t.test('reading the new records from the xstage', function(t){
+												t.plan(6);
+												stage.products.find({}).toArray(function(err, docs){
+													t.notOk(err, 'found products on xstage');
+													t.deepEqual(docs, [
+														{userId: 1, _id: 1, name: 'apple xxl'},
+														{userId: 1, _id: 2, name: 'orange xxl'}
+													], 'is not adding any new documents to xstage');
+												});
+												stage.customers.find({}).toArray(function(err, docs){
+													t.notOk(err, 'found customers on xstage');
+													t.deepEqual(docs, [
+														{userId: 1, _id: 1, name: 'mr bob'},
+														{userId: 1, _id: 2, name: 'mr rob'},
+													], 'is not adding any new documents to xstage');
+												});
+												stage.countries.find({}).toArray(function(err, docs){
+													t.notOk(err, 'found countries on xstage');
+													t.deepEqual(docs, testData.countries, 'is not adding any new documents to xstage');
+												});
+											});
 											t.end();
 										});
 									});

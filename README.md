@@ -59,7 +59,9 @@ var opts = {
 			},
 			countries: {}	
 		},
-		ignoreDuplicates: true // do not kill the proccess if duplicate error occured, false by default
+		dryRun: true, // fake run without inserts, reports docs which are found by given queries
+		log: true, // streaming logs, false by default
+		ignoreDuplicates: true // continue if duplicate error occured, false by default
 	}
 };
 

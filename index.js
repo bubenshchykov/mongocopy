@@ -29,7 +29,7 @@ function run(opts, cb) {
 		var insy =  new stream.Transform({objectMode: true});
 		insy._transform = function (doc, enc, cb) {
 			var _this = this;
-			return colTo.insert(doc, function(err, newDoc) {
+			return opts.dryRun ? cb(null, doc) : colTo.insert(doc, function(err, newDoc) {
 				if (err) {
 					if (err.code === DUPLICATE_KEY_ERROR) {
 						report[colName].duplicates++;
