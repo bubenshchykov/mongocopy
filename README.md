@@ -1,4 +1,4 @@
-mongocopy
+mongocopy [![Build Status](https://travis-ci.org/bubenshchykov/mongocopy.png?branch=master)](https://travis-ci.org/bubenshchykov/mongocopy)
 =========
 
 Sometimes we need to copy a special set of user data from one environment to another.
