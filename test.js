@@ -114,46 +114,64 @@ test('cleaning previous test data', function(t) {
 											t.end();
 										});
 									});
+								});
+							});
+							
+							
+							t.end();
+						})
+					});
+				});
+			});
+			t.end();
+		});
+	});
+});
 
-									t.test('copying data from xprod to xstage in dry run', function(t) {
-										var dryRun = JSON.parse(JSON.stringify(testConfig));
-										dryRun.dryRun = true;
-										mongocopy(dryRun, function(err, report) {
-											t.notOk(err, 'dry run went good');
-											t.deepEqual(report, {
-												countries: {copied: 3},
-												customers: {copied: 2},
-												products: {copied: 2}
-											}, 'reports documents satisfying the given queries');
-											t.test('reading the new records from the xstage', function(t){
-												t.plan(6);
-												stage.products.find({}).toArray(function(err, docs){
-													t.notOk(err, 'found products on xstage');
-													t.deepEqual(docs, [
-														{userId: 1, _id: 1, name: 'apple xxl'},
-														{userId: 1, _id: 2, name: 'orange xxl'}
-													], 'is not adding any new documents to xstage');
-												});
-												stage.customers.find({}).toArray(function(err, docs){
-													t.notOk(err, 'found customers on xstage');
-													t.deepEqual(docs, [
-														{userId: 1, _id: 1, name: 'mr bob'},
-														{userId: 1, _id: 2, name: 'mr rob'},
-													], 'is not adding any new documents to xstage');
-												});
-												stage.countries.find({}).toArray(function(err, docs){
-													t.notOk(err, 'found countries on xstage');
-													t.deepEqual(docs, testData.countries, 'is not adding any new documents to xstage');
-												});
-											});
-											t.end();
+test('cleaning previous test data', function(t) {
+	var prod = mongojs('xprod', ['products', 'customers', 'countries']);
+	prod.dropDatabase(function(err){
+		t.notOk(err, 'xprod db removed');
+		var stage = mongojs('xstage', ['products', 'customers', 'countries']);
+		stage.dropDatabase(function(err){
+			t.notOk(err, 'xstage db removed');
+			
+			t.test('mocking prod db', function(t) {
+				prod.products.insert(testData.products, function(err) {
+					t.notOk(err, 'added products to xprod');
+					prod.customers.insert(testData.customers, function(err) {
+						t.notOk(err, 'added customers to xprod');
+						prod.countries.insert(testData.countries, function(err){
+							t.notOk(err, 'added countries to xprod');
+
+							t.test('copying data from xprod to xstage in dry run', function(t) {
+								var dryRun = JSON.parse(JSON.stringify(testConfig));
+								dryRun.dryRun = true;
+								mongocopy(dryRun, function(err, report) {
+									t.notOk(err, 'dry run went good');
+									t.deepEqual(report, {
+										countries: {copied: 3},
+										customers: {copied: 2},
+										products: {copied: 2}
+									}, 'reports documents satisfying the given queries');
+									t.test('reading the new records from the xstage', function(t){
+										t.plan(6);
+										stage.products.find({}).toArray(function(err, docs){
+											t.notOk(err, 'found products on xstage');
+											t.deepEqual(docs, [], 'is not adding any new documents to xstage');
+										});
+										stage.customers.find({}).toArray(function(err, docs){
+											t.notOk(err, 'found customers on xstage');
+											t.deepEqual(docs, [], 'is not adding any new documents to xstage');
+										});
+										stage.countries.find({}).toArray(function(err, docs){
+											t.notOk(err, 'found countries on xstage');
+											t.deepEqual(docs, [], 'is not adding any new documents to xstage');
 										});
 									});
 									t.end();
 								});
 							});
-							
-							
 							t.end();
 						})
 					});

@@ -28,8 +28,12 @@ function run(opts, cb) {
 
 		var insy =  new stream.Transform({objectMode: true});
 		insy._transform = function (doc, enc, cb) {
+			if (opts.dryRun) {
+				this.push(doc);
+				return cb(null);
+			}
 			var _this = this;
-			return opts.dryRun ? cb(null, doc) : colTo.insert(doc, function(err, newDoc) {
+			colTo.insert(doc, function(err, newDoc) {
 				if (err) {
 					if (err.code === DUPLICATE_KEY_ERROR) {
 						report[colName].duplicates++;
@@ -55,14 +59,14 @@ function run(opts, cb) {
 					if (err){
 						return cb(err);
 					}
-					_this.push(newDoc);
+					newDoc && _this.push(newDoc);
 					return cb();
 				});
 			}
-			cursor = cursor.pipe(transy).pipe(insy);
-		} else {
-			cursor = cursor.pipe(insy);
+			cursor = cursor.pipe(transy);
 		}
+
+		cursor = cursor.pipe(insy);
 		
 		return cursor
 			.on('data', function(data) {
