@@ -21,8 +21,8 @@ function run(opts, cb) {
 	});
 
 	function runOne(colName, cb) {
-		var colFrom = dbFrom[colName];
-		var colTo = dbTo[colName];
+		var colFrom = deepValue(dbFrom, colName);
+		var colTo = deepValue(dbTo, colName);
 		var query = opts.data[colName].query || {};
 		var transform = opts.data[colName].transform;
 
@@ -67,7 +67,7 @@ function run(opts, cb) {
 		}
 
 		cursor = cursor.pipe(insy);
-		
+
 		return cursor
 			.on('data', function(data) {
 				report[colName].copied++;
@@ -83,6 +83,15 @@ function run(opts, cb) {
 
 	function log() {
 		opts.log && console.log.apply(this, ['	'].concat([].slice.call(arguments)));
+	}
+
+	function deepValue(obj, path){
+		var res = obj;
+		var nodes = path.split('.');
+		for (var i = 0; i < nodes.length; i++) {
+			res = res[nodes[i]];
+		}
+		return res;
 	}
 }
 
