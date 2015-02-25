@@ -86,11 +86,12 @@ function run(opts, cb) {
 	}
 
 	function deepValue(obj, path){
+		var res = obj;
 		var nodes = path.split('.');
-		for (var i = 0; i < nodes.length; i++){
-			obj = obj[nodes[i]];
+		for (var i = 0; i < nodes.length; i++) {
+			res = res[nodes[i]];
 		}
-		return obj;
+		return res;
 	}
 }
 
