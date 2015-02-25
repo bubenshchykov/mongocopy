@@ -30,7 +30,7 @@ var testConfig = {
 						doc.name += ' xxl';
 						return cb(null, doc);
 					}, 1);
-				}		
+				}
 			},
 			customers: {
 				query: {userId: 1},
@@ -39,7 +39,7 @@ var testConfig = {
 					return cb(null, doc);
 				}
 			},
-			countries: {}	
+			countries: {}
 		},
 		log: true
 	};
@@ -51,7 +51,7 @@ test('cleaning previous test data', function(t) {
 		var stage = mongojs('xstage', ['products', 'customers', 'countries']);
 		stage.dropDatabase(function(err){
 			t.notOk(err, 'xstage db removed');
-			
+
 			t.test('mocking prod db', function(t) {
 				prod.products.insert(testData.products, function(err) {
 					t.notOk(err, 'added products to xprod');
@@ -116,8 +116,8 @@ test('cleaning previous test data', function(t) {
 									});
 								});
 							});
-							
-							
+
+
 							t.end();
 						})
 					});
@@ -135,7 +135,7 @@ test('cleaning previous test data', function(t) {
 		var stage = mongojs('xstage', ['products', 'customers', 'countries']);
 		stage.dropDatabase(function(err){
 			t.notOk(err, 'xstage db removed');
-			
+
 			t.test('mocking prod db', function(t) {
 				prod.products.insert(testData.products, function(err) {
 					t.notOk(err, 'added products to xprod');
