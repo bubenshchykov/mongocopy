@@ -1,6 +1,6 @@
 {
   "name": "mongocopy",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "description": "module for copying the subsets of data between mongo databases",
   "main": "index.js",
   "scripts": {
@@ -18,7 +18,7 @@
   "author": "bubenshchykov",
   "license": "ISC",
   "dependencies": {
-    "mongojs": "^0.13.0",
+    "mongojs": "git://github.com/debitoor/mongojs#v1.0.3",
     "async": "^0.9.0"
   },
   "devDependencies": {

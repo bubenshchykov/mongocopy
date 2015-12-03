@@ -5,13 +5,9 @@ var async = require('async');
 var DUPLICATE_KEY_ERROR = 11000;
 
 function run(opts, cb) {
-	if (!(opts && opts.uriFrom && opts.uriTo && opts.data)) {
-		throw 'uriFrom|uritTo|data options are missing';
-	}
-
 	var collections = Object.keys(opts.data);
-	var dbFrom = mongojs(opts.uriFrom, collections);
-	var dbTo = mongojs(opts.uriTo, collections);
+	var dbFrom = mongojs.viaNative(opts.dbFrom.uri, opts.dbFrom.options, collections);
+	var dbTo = mongojs.viaNative(opts.dbTo.uri, opts.dbTo.options, collections);
 
 	var report = {};
 	log('copying..');
@@ -21,8 +17,8 @@ function run(opts, cb) {
 	});
 
 	function runOne(colName, cb) {
-		var colFrom = deepValue(dbFrom, colName);
-		var colTo = deepValue(dbTo, colName);
+		var colFrom = dbFrom[colName];
+		var colTo = dbTo[colName];
 		var query = opts.data[colName].query || {};
 		var transform = opts.data[colName].transform;
 
@@ -85,14 +81,6 @@ function run(opts, cb) {
 		opts.log && console.log.apply(this, ['	'].concat([].slice.call(arguments)));
 	}
 
-	function deepValue(obj, path){
-		var res = obj;
-		var nodes = path.split('.');
-		for (var i = 0; i < nodes.length; i++) {
-			res = res[nodes[i]];
-		}
-		return res;
-	}
 }
 
 module.exports = run;
