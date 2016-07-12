@@ -6,8 +6,12 @@ var DUPLICATE_KEY_ERROR = 11000;
 
 function run(opts, cb) {
 	var collections = Object.keys(opts.data);
-	var dbFrom = mongojs.viaNative(opts.dbFrom.uri, opts.dbFrom.options, collections);
-	var dbTo = mongojs.viaNative(opts.dbTo.uri, opts.dbTo.options, collections);
+	var dbFrom = opts.dbFrom.ObjectId ?
+		opts.dbFrom :
+		mongojs.viaNative(opts.dbFrom.uri, opts.dbFrom.options, collections);
+	var dbTo = opts.dbTo.ObjectId ?
+		opts.dbTo :
+		mongojs.viaNative(opts.dbTo.uri, opts.dbTo.options, collections);
 
 	var report = {};
 	log('copying..');
