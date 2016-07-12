@@ -23,6 +23,9 @@ function run(opts, cb) {
 	function runOne(colName, cb) {
 		var colFrom = dbFrom[colName];
 		var colTo = dbTo[colName];
+		if (!colFrom || !colTo) {
+			return cb(new Error('There is no column "' + colName + '" in database'));
+		}
 		var query = opts.data[colName].query || {};
 		var transform = opts.data[colName].transform;
 
