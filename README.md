@@ -1,4 +1,4 @@
-mongocopy [![Build Status](https://travis-ci.org/bubenshchykov/mongocopy.png?branch=master)](https://travis-ci.org/bubenshchykov/mongocopy)
+mongocopy [![Build Status](https://travis-ci.org/debitoor/mongocopy.png?branch=master)](https://travis-ci.org/debitoor/mongocopy)
 =========
 
 [![NPM](https://nodei.co/npm/mongocopy.png?global=true)](https://nodei.co/npm/mongocopy/)
@@ -59,7 +59,7 @@ var opts = {
 					return cb(null, doc);
 				}
 			},
-			countries: {}	
+			countries: {}
 		},
 		dryRun: true, // fake run without inserts, reports docs which are found by given queries
 		log: true, // streaming logs, false by default

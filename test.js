@@ -20,8 +20,8 @@ var testData = {
 	};
 
 var testConfig = {
-		uriFrom: 'xprod',
-		uriTo: 'xstage',
+		dbFrom: {uri: 'xprod'},
+		dbTo: {uri: 'xstage'},
 		data: {
 			products: {
 				query: {userId: 1},
