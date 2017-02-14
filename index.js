@@ -15,7 +15,7 @@ function run(opts, cb) {
 
 	async.parallel({
 		dbFrom: (done) => MongoClient.connect(dbFrom.uri, dbFrom.options, done),
-		dbTo: (done) => MongoClient.connect(dbTo.uri, dbFrom.options, done)
+		dbTo: (done) => MongoClient.connect(dbTo.uri, dbTo.options, done)
 	}, (err, dbs) => {
 		if(err) {
 			return cb(err);
