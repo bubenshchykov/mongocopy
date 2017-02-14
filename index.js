@@ -1,42 +1,53 @@
-var mongojs = require('mongojs');
-var stream = require('stream');
-var async = require('async');
+const {MongoClient} = require('mongodb');
+const stream = require('stream');
+const async = require('async');
 
-var DUPLICATE_KEY_ERROR = 11000;
+const DUPLICATE_KEY_ERROR = 11000;
 
 function run(opts, cb) {
-	var collections = Object.keys(opts.data);
-	var dbFrom = opts.dbFrom.ObjectId ?
-		opts.dbFrom :
-		mongojs(opts.dbFrom.uri, opts.dbFrom.options, collections);
-	var dbTo = opts.dbTo && opts.dbTo.ObjectId ?
-		opts.dbTo :
-		mongojs(opts.dbTo.uri, opts.dbTo.options, collections);
+	const collections = Object.keys(opts.data);
+	let {dbFrom, dbTo} = opts;
+	if(dbFrom.ObjectId && dbTo.ObjectId) {
+		return startCopy();
+	}
 
-	var report = {};
-	log('copying..');
-	return async.eachSeries(collections, runOne, function(err) {
-		log('finished.');
-		return cb(err, report);
+	const report = {};
+
+	async.parallel({
+		dbFrom: (done) => MongoClient.connect(dbFrom.uri, dbFrom.options, done),
+		dbTo: (done) => MongoClient.connect(dbTo.uri, dbFrom.options, done)
+	}, (err, dbs) => {
+		if(err) {
+			return cb(err);
+		}
+		dbFrom = dbs.dbFrom;
+		dbTo = dbs.dbTo;
+		startCopy();
 	});
 
-	function runOne(colName, cb) {
-		var colFrom = dbFrom[colName];
-		var colTo = dbTo[colName];
-		if (!colFrom || !colTo) {
-			return cb(new Error('There is no column "' + colName + '" in database'));
-		}
-		var query = opts.data[colName].query || {};
-		var transform = opts.data[colName].transform;
+	function startCopy() {
+		log('copying..');
+		return async.eachSeries(collections, runOne, function(err) {
+			log('finished.');
+			return cb(err, report);
+		});
+	}
 
-		var insy =  new stream.Transform({objectMode: true});
+
+	function runOne(colName, cb) {
+		const colFrom = dbFrom.collection(colName);
+		const colTo = dbTo.collection(colName);
+		const query = opts.data[colName].query || {};
+		const {transform} = opts.data[colName];
+
+		const insy =  new stream.Transform({objectMode: true});
 		insy._transform = function (doc, enc, cb) {
 			if (opts.dryRun) {
 				this.push(doc);
 				return cb(null);
 			}
-			var _this = this;
-			colTo.insert(doc, function(err, newDoc) {
+			const _this = this;
+			colTo.insertOne(doc, function(err, newDoc) {
 				if (err) {
 					if (err.code === DUPLICATE_KEY_ERROR) {
 						report[colName].duplicates++;
@@ -48,16 +59,16 @@ function run(opts, cb) {
 				_this.push(newDoc);
 				return cb();
 			});
-		}
+		};
 
 		log(colName, 'started..');
-		var cursor = colFrom.find(query);
+		let cursor = colFrom.find(query);
 		report[colName] = {copied: 0, duplicates: 0, duplicateIds: []};
 
 		if (transform) {
-			var transy = new stream.Transform({objectMode: true});
+			const transy = new stream.Transform({objectMode: true});
 			transy._transform = function(doc, enc, cb) {
-				var _this = this;
+				const _this = this;
 				return transform(doc, function(err, newDoc) {
 					if (err){
 						return cb(err);
@@ -65,7 +76,7 @@ function run(opts, cb) {
 					newDoc && _this.push(newDoc);
 					return cb();
 				});
-			}
+			};
 			cursor = cursor.pipe(transy);
 		}
 
