@@ -1,4 +1,4 @@
-const {MongoClient} = require('mongodb');
+const { MongoClient } = require('mongodb');
 const stream = require('stream');
 const async = require('async');
 
@@ -20,8 +20,8 @@ function run(opts, cb) {
 		if(err) {
 			return cb(err);
 		}
-		dbFrom = dbs.dbFrom;
-		dbTo = dbs.dbTo;
+		dbFrom = dbs.dbFrom.db();
+		dbTo = dbs.dbTo.db();
 		startCopy();
 	});
 
